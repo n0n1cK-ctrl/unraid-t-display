@@ -6,6 +6,14 @@ ESP32/LILYGO T-Display project for Unraid server monitoring with a switchable co
 
 `firmware/` contains the complete PlatformIO/Arduino firmware for the LilyGO T-Display-S3: the existing Unraid status screen, the persistent cover view, GPIO14 mode switching, LittleFS/NVS persistence and the display HTTP endpoints. Create a local ignored `firmware/include/secrets.h` before compiling.
 
+## Fotos aus dem Aufbau
+
+![Unraid-Server mit montiertem T-Display](docs/images/unraid-rack-overview.jpeg)
+
+![Unraid-Statusanzeige auf dem T-Display](docs/images/status-display.jpeg)
+
+![Cover-Anzeige auf dem T-Display](docs/images/cover-display.jpeg)
+
 ## Radarr and Sonarr
 
 In **Settings → Connect → + → Webhook** create or keep the `LilyGO Cover` webhook:
