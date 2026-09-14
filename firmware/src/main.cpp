@@ -164,6 +164,30 @@ void drawDashboard(JsonDocument& doc) {
   tft.drawString(uptimeText, 162 - uptimeWidth, 301);
 }
 
+
+void drawStorage(JsonDocument& doc) {
+  tft.fillScreen(TFT_BLACK);
+  tft.fillRect(0, 0, 170, 30, UNRAID_ORANGE);
+  tft.setTextFont(2); tft.setTextColor(TFT_WHITE, UNRAID_ORANGE); tft.drawString("SPEICHER", 8, 7);
+  JsonObject storage = doc["storage"].as<JsonObject>();
+  long long freeBytes = storage["free"] | (doc["free_bytes"] | 0LL);
+  long long totalBytes = storage["total"] | (doc["total_bytes"] | 0LL);
+  if (freeBytes <= 0) {
+    tft.setTextFont(2); tft.setTextColor(TFT_YELLOW, TFT_BLACK); tft.drawString("Keine Daten", 8, 140); return;
+  }
+  float freeGb = freeBytes / 1073741824.0f;
+  float totalGb = totalBytes > 0 ? totalBytes / 1073741824.0f : 0;
+  tft.setTextFont(2); tft.setTextColor(TFT_WHITE, TFT_BLACK); tft.drawString("FREI", 8, 58);
+  String freeText = totalGb > 0 ? String(freeGb, 1) + "/" + String(totalGb, 1) + " GB" : String(freeGb, 1) + " GB";
+  tft.drawString(freeText, 8, 92);
+  if (totalBytes > 0) {
+    int used = 100 - (int)((freeBytes * 100) / totalBytes);
+    drawBar(8, 132, 154, 12, used, statusColor(used, 70, 90));
+  }
+  tft.setTextFont(1); tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
+  tft.drawString("Taster: nächste Seite", 8, 292);
+}
+
 void drawMessage(const char* title, const char* detail, uint16_t color) {
   if (coverMode) return;
   tft.fillScreen(TFT_BLACK);
@@ -211,6 +235,7 @@ void fetchAndDraw() {
   JsonDocument doc;
   auto result = deserializeJson(doc, payload);
   if (result) { drawMessage("JSON FEHLER", result.c_str(), TFT_RED); return; }
+  if (displayPage == 1) { drawStorage(doc); return; }
   drawDashboard(doc);
 }
 

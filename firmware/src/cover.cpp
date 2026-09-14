@@ -9,6 +9,7 @@ extern TFT_eSPI tft;
 extern const char* COVER_TOKEN;
 extern uint32_t lastRefresh;
 bool coverMode = false;
+volatile uint8_t displayPage = 0;
 static WebServer server(80);
 static Preferences prefs;
 static bool storageOK = false, uploadOK = false;
@@ -68,6 +69,7 @@ void coverSetup() {
   pinMode(14, INPUT_PULLUP);
   storageOK = prefs.begin("cover", false);
   coverMode = prefs.getBool("mode", false);
+  displayPage = coverMode ? 2 : 0;
   // Never format automatically: a mount error must not erase the saved image.
   bool mounted = LittleFS.begin(false);
   // First-time initialization is an explicit five-second hold of GPIO14 at startup.
@@ -147,7 +149,9 @@ void coverLoop() {
   if(now!=stable && millis()-changed>=35) {
     stable=now;
     if(!stable) {
-      coverMode=!coverMode; prefs.putBool("mode",coverMode);
+      displayPage = (displayPage + 1) % 3;
+      coverMode = displayPage == 2;
+      prefs.putBool("mode", coverMode);
       if(coverMode) drawCover(); else lastRefresh=millis()-5000;
     }
   }
