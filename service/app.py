@@ -35,7 +35,7 @@ def parse_event(source, payload):
             'tmdbId': media.get('tmdbId'), 'tvdbId': media.get('tvdbId'),
             'season': (payload.get('episode') or {}).get('seasonNumber'),
             'episode': (payload.get('episode') or {}).get('episodeNumber'),
-            'year': media.get('year')}
+            'year': media.get('year') or str(media.get('releaseDate') or media.get('premiereDate') or '')[:4]}
 
 def enqueue(event):
     with db() as c:
@@ -73,7 +73,7 @@ def deliver_once():
     # Superseded preparation must never replace a more recent queued import.
     with db() as c:
         if c.execute('SELECT revision FROM latest WHERE id=1').fetchone()[0] != revision: return False
-    if info.get('sha256') != digest:
+    if True:  # resend metadata even when the poster pixels are unchanged
         event=json.loads(payload)
         params={'sha256':digest, 'title':event.get('title',''), 'season':event.get('season',''), 'episode':event.get('episode',''), 'year':event.get('year','')}
         r=requests.post(DISPLAY+'/cover',params=params,headers=headers,files={'image':('cover.raw',frame,'application/octet-stream')},timeout=30,allow_redirects=False)
