@@ -108,7 +108,7 @@ void coverSetup() {
       current=slot;
       coverTitle=server.arg("title");
       String season=server.arg("season"), episode=server.arg("episode");
-      coverEpisode = (season.length() && episode.length()) ? "S" + (season.toInt()<10?"0":"") + season + " E" + (episode.toInt()<10?"0":"") + episode : "";
+      coverEpisode = (season.length() && episode.length()) ? String("S") + (season.toInt()<10?"0":"") + season + " E" + (episode.toInt()<10?"0":"") + episode : "";
       prefs.putString("title",coverTitle); prefs.putString("episode",coverEpisode);
       uploadOK=true;
       prefs.putString("slot",slot); prefs.putString("hash",wantedHash);
