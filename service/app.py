@@ -34,7 +34,8 @@ def parse_event(source, payload):
     return {'source': source, 'id': media['id'], 'title': str(media.get('title', ''))[:500],
             'tmdbId': media.get('tmdbId'), 'tvdbId': media.get('tvdbId'),
             'season': (payload.get('episode') or {}).get('seasonNumber'),
-            'episode': (payload.get('episode') or {}).get('episodeNumber')}
+            'episode': (payload.get('episode') or {}).get('episodeNumber'),
+            'year': media.get('year')}
 
 def enqueue(event):
     with db() as c:
@@ -74,7 +75,7 @@ def deliver_once():
         if c.execute('SELECT revision FROM latest WHERE id=1').fetchone()[0] != revision: return False
     if info.get('sha256') != digest:
         event=json.loads(payload)
-        params={'sha256':digest, 'title':event.get('title',''), 'season':event.get('season',''), 'episode':event.get('episode','')}
+        params={'sha256':digest, 'title':event.get('title',''), 'season':event.get('season',''), 'episode':event.get('episode',''), 'year':event.get('year','')}
         r=requests.post(DISPLAY+'/cover',params=params,headers=headers,files={'image':('cover.raw',frame,'application/octet-stream')},timeout=30,allow_redirects=False)
         r.raise_for_status()
         if r.status_code != 200: raise ValueError('Upload not acknowledged')
