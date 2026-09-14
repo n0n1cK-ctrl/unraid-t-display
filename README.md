@@ -63,6 +63,8 @@ Fourteen tests cover the original service behavior plus Whisparr movie/scene imp
 - Deployed image: `unraid-cover:whisparr-20260914`; container `unraid-cover`, port `192.168.178.56:8089`, restart policy `unless-stopped`.
 - Private configuration/code backup: `/mnt/user/appdata/unraid-cover/backup-before-whisparr-20260914/`; SQLite backup: `data/before-whisparr-20260914.sqlite`.
 - Previous container retained stopped as `unraid-cover-before-whisparr-20260914`. For rollback, stop and rename the new container before renaming/starting the previous one. Do not overwrite the live database with the backup unless intentionally reverting newer imports.
+- After deployment, harmless HTTP Test webhooks to all three production routes returned 200.
+- Whisparr Connect creation/verification is still pending: the shared Safari terminal was interrupted by concurrent user activity. Check for an existing `LilyGO Cover` entry before retrying; do not create a duplicate.
 - The real display reports `/info` HTTP 200, available storage and RGB565LE support. A real future Whisparr import remains the final physical end-to-end check; no production import was fabricated.
 
 Payload source: [Whisparr WebhookBase](https://github.com/Whisparr/Whisparr-Eros/blob/eros-develop/src/NzbDrone.Core/Notifications/Webhook/WebhookBase.cs), especially `BuildOnDownloadPayload`.
