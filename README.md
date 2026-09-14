@@ -4,6 +4,8 @@ ESP32/LILYGO T-Display project for Unraid server monitoring with a switchable co
 
 `service/` contains the Unraid cover service for Radarr and Sonarr. Firmware is maintained separately; this change does not flash or modify the display.
 
+`firmware/` contains the complete PlatformIO/Arduino firmware for the LilyGO T-Display-S3: the existing Unraid status screen, the persistent cover view, GPIO14 mode switching, LittleFS/NVS persistence and the display HTTP endpoints. Create a local ignored `firmware/include/secrets.h` before compiling.
+
 ## Radarr and Sonarr
 
 In **Settings → Connect → + → Webhook** create or keep the `LilyGO Cover` webhook:
