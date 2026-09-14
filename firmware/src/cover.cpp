@@ -42,8 +42,8 @@ static void drawCover() {
   for (int y=0;y<320;y++) { if(f.read((uint8_t*)row,sizeof(row)) != sizeof(row)) break; tft.pushImage(0,y,170,1,row); }
   tft.setSwapBytes(false);
   if (coverTitle.length()) {
-    tft.fillRect(0, 288, 170, 32, TFT_DARKGREY);
-    tft.setTextFont(1); tft.setTextSize(1); tft.setTextColor(TFT_WHITE, TFT_DARKGREY);
+    tft.fillRect(0, 288, 170, 32, TFT_BLACK);
+    tft.setTextFont(1); tft.setTextSize(1); tft.setTextColor(TFT_WHITE, TFT_BLACK);
     String line = coverTitle;
     if (coverEpisode.length()) line += " " + coverEpisode;
     while (line.length() && tft.textWidth(line) > 162) line.remove(line.length()-1);
