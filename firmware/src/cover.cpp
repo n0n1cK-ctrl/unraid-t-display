@@ -29,6 +29,28 @@ static String hashFile(const String& path) {
   char hex[65]; for (int i=0;i<32;i++) sprintf(hex+i*2,"%02x",digest[i]);
   return String(hex);
 }
+static String labelText() {
+  String line = coverTitle;
+  if (coverYear.length()) line += String(" (") + coverYear + ")";
+  if (coverEpisode.length()) line += String(" ") + coverEpisode;
+  return line;
+}
+static void drawCoverLabel() {
+  if (!coverTitle.length()) return;
+  static String lastLine;
+  static int offset = 0;
+  static uint32_t lastStep = 0;
+  String line = labelText();
+  if (line != lastLine) { lastLine = line; offset = 0; lastStep = millis(); }
+  tft.fillRect(0, 288, 170, 32, TFT_BLACK);
+  tft.setTextFont(1); tft.setTextSize(1); tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  if (tft.textWidth(line) <= 162) { tft.drawString(line, 4, 292); return; }
+  if (millis() - lastStep >= 220) { offset++; lastStep = millis(); }
+  String view = line.substring(offset);
+  while (view.length() && tft.textWidth(view) > 162) view.remove(view.length()-1);
+  if (offset > line.length() || offset > 0 && tft.textWidth(view) < 12) offset = 0;
+  tft.drawString(view, 4, 292);
+}
 static void drawCover() {
   tft.fillScreen(TFT_BLACK);
   File f = storageOK ? LittleFS.open(current, "r") : File();
@@ -37,19 +59,10 @@ static void drawCover() {
     tft.drawString(storageOK ? "Noch kein Cover" : "Speicherfehler", 8, 140); return;
   }
   uint16_t row[170];
-  // Wire format is little-endian RGB565, matching the ESP32's uint16_t.
   tft.setSwapBytes(true);
   for (int y=0;y<320;y++) { if(f.read((uint8_t*)row,sizeof(row)) != sizeof(row)) break; tft.pushImage(0,y,170,1,row); }
   tft.setSwapBytes(false);
-  if (coverTitle.length()) {
-    tft.fillRect(0, 288, 170, 32, TFT_BLACK);
-    tft.setTextFont(1); tft.setTextSize(1); tft.setTextColor(TFT_WHITE, TFT_BLACK);
-    String line = coverTitle;
-    if (coverYear.length()) line += String(" (") + coverYear + ")";
-    if (coverEpisode.length()) line += " " + coverEpisode;
-    while (line.length() && tft.textWidth(line) > 162) line.remove(line.length()-1);
-    tft.drawString(line, 4, 292);
-  }
+  drawCoverLabel();
 }
 void coverSetup() {
   pinMode(14, INPUT_PULLUP);
