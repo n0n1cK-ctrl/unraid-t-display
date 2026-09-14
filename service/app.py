@@ -27,7 +27,7 @@ def parse_event(source, payload):
     event = payload.get('eventType')
     if event == 'Test': return None
     if event != 'Download': return None
-    key = 'movie' if source in ('radarr', 'whisparr') else 'series'
+    key = 'movie' if source == 'radarr' else 'series'
     media = payload.get(key)
     if not isinstance(media, dict) or type(media.get('id')) is not int or media['id'] <= 0:
         raise ValueError('Import needs a positive media ID')
@@ -47,7 +47,7 @@ def rgb565(image_bytes, width, height):
 
 def poster(event):
     source = event['source']
-    if source not in ('radarr', 'sonarr', 'whisparr') or type(event['id']) is not int or event['id'] <= 0:
+    if source not in ('radarr', 'sonarr') or type(event['id']) is not int or event['id'] <= 0:
         raise ValueError('Invalid media identifier')
     root = Path(os.getenv('POSTER_ROOT', '/posters')) / source
     path = root / str(event['id']) / 'poster.jpg'
@@ -92,7 +92,7 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         self.connection.settimeout(10)
         route = urlsplit(self.path).path.split('/')
-        if len(route)!=4 or route[1]!='webhook' or route[2] not in ('radarr','sonarr','whisparr') or not hmac.compare_digest(route[3],HOOK):
+        if len(route)!=4 or route[1]!='webhook' or route[2] not in ('radarr','sonarr') or not hmac.compare_digest(route[3],HOOK):
             self.reply(401,'unauthorized'); return
         try:
             size=int(self.headers.get('Content-Length','0'))

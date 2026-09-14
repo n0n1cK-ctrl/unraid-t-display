@@ -9,7 +9,6 @@ services:
       - ./data:/data
       - /mnt/user/appdata/radarr/MediaCover:/posters/radarr:ro
       - /mnt/user/appdata/sonarr/MediaCover:/posters/sonarr:ro
-      - /mnt/user/appdata/whisparr/MediaCover/movie:/posters/whisparr:ro
     logging:
       options:
         max-size: "5m"
