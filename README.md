@@ -10,7 +10,7 @@ ESP32/LILYGO T-Display project for Unraid server monitoring with a switchable co
 
 ![Unraid-Server mit montiertem T-Display](docs/images/unraid-rack-overview.jpeg)
 
-![Unraid-Statusanzeige auf dem T-Display](docs/images/status-display.jpeg)
+![Unraid-Statusanzeige auf dem T-Display](docs/images/status-display.png)
 
 ![Cover-Anzeige auf dem T-Display](docs/images/cover-display.jpeg)
 

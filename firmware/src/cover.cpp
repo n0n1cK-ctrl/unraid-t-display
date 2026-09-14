@@ -17,7 +17,7 @@ static size_t received;
 static String slot, wantedHash;
 
 static constexpr size_t IMAGE_BYTES = 170 * 320 * 2;
-static String current;
+static String current, coverTitle, coverEpisode;
 static bool authorized() { return server.header("Authorization") == String("Bearer ") + COVER_TOKEN; }
 static String hashFile(const String& path) {
   File f = LittleFS.open(path, "r");
@@ -41,6 +41,14 @@ static void drawCover() {
   tft.setSwapBytes(true);
   for (int y=0;y<320;y++) { if(f.read((uint8_t*)row,sizeof(row)) != sizeof(row)) break; tft.pushImage(0,y,170,1,row); }
   tft.setSwapBytes(false);
+  if (coverTitle.length()) {
+    tft.fillRect(0, 288, 170, 32, TFT_DARKGREY);
+    tft.setTextFont(1); tft.setTextSize(1); tft.setTextColor(TFT_WHITE, TFT_DARKGREY);
+    String line = coverTitle;
+    if (coverEpisode.length()) line += " " + coverEpisode;
+    while (line.length() && tft.textWidth(line) > 162) line.remove(line.length()-1);
+    tft.drawString(line, 4, 292);
+  }
 }
 void coverSetup() {
   pinMode(14, INPUT_PULLUP);
@@ -58,6 +66,8 @@ void coverSetup() {
   // user holds GPIO14 during startup. Otherwise keep the dashboard usable.
   storageOK = mounted && storageOK;
   current = prefs.getString("slot", "");
+  coverTitle = prefs.getString("title", "");
+  coverEpisode = prefs.getString("episode", "");
   if (storageOK && hashFile(current) != prefs.getString("hash", "invalid")) current = "";
   if (coverMode) drawCover();
   const char* headers[] = {"Authorization"}; server.collectHeaders(headers, 1);
@@ -95,7 +105,12 @@ void coverSetup() {
       // Store slot+digest in a single NVS value so power loss cannot split the commit.
       String commit=slot+"|"+wantedHash;
       if(prefs.putString("commit",commit)!=commit.length()) return;
-      current=slot; uploadOK=true;
+      current=slot;
+      coverTitle=server.arg("title");
+      String season=server.arg("season"), episode=server.arg("episode");
+      coverEpisode = (season.length() && episode.length()) ? "S" + (season.toInt()<10?"0":"") + season + " E" + (episode.toInt()<10?"0":"") + episode : "";
+      prefs.putString("title",coverTitle); prefs.putString("episode",coverEpisode);
+      uploadOK=true;
       prefs.putString("slot",slot); prefs.putString("hash",wantedHash);
     } else if(u.status==UPLOAD_FILE_ABORTED) { if(upload) upload.close(); uploadOK=false; }
   });
