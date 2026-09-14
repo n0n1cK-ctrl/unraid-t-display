@@ -1,0 +1,11 @@
+.env
+.env.*
+!.env.example
+secrets.h
+__pycache__/
+*.pyc
+.pio/
+data/
+*.sqlite*
+*.db
+backup*/

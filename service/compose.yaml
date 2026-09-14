@@ -1,0 +1,16 @@
+services:
+  display-cover:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8089:8080"
+    env_file: .env
+    volumes:
+      - ./data:/data
+      - /mnt/user/appdata/radarr/MediaCover:/posters/radarr:ro
+      - /mnt/user/appdata/sonarr/MediaCover:/posters/sonarr:ro
+      - /mnt/user/appdata/whisparr/MediaCover/movie:/posters/whisparr:ro
+    logging:
+      options:
+        max-size: "5m"
+        max-file: "2"
