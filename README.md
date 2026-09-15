@@ -65,6 +65,8 @@ The `/status` response must additionally contain:
 }
 ```
 
+Diese Installation verwendet einen gebündelten Speicherpool ohne klassisches Unraid-Array mit Paritätslaufwerk. Die Speicherberechnung ist deshalb installationsabhängig; bei einem Array-/Parity-Setup müssen Datensatz, Mount-Pfad und Abfrage angepasst werden.
+
 Storage values are bytes; memory values are MiB. The current firmware divides by powers of 1024, although its labels say TB/GB (numerically TiB/GiB). Select the actual storage dataset, not the cache pool. The installation uses `/mnt/storage/Data`. Its host-side `status.sh` and API changes were applied separately on Unraid and are not included in this repository snapshot.
 
 Fan roles must be verified against the physical connectors: the two sensors both report `Array Fan`, so their order alone does not establish CPU versus case fan. GPU fallback zeros do not prove a successful measurement or the absence of transcoding.
