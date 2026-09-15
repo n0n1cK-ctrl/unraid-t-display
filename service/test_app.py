@@ -44,12 +44,13 @@ class Tests(unittest.TestCase):
   def replace(event):app.enqueue(self.event(2));return self.image()
   with patch.object(app.requests,'get',return_value=self.info()),patch.object(app,'poster',side_effect=replace),patch.object(app.requests,'post') as post:
    self.assertFalse(app.deliver_once());post.assert_not_called()
- def test_same_digest(self):
+ def test_same_digest_resends_metadata(self):
   app.enqueue(self.event());info=self.info()
   with patch.object(app.requests,'get',return_value=info),patch.object(app,'poster',return_value=self.image()),patch.object(app.requests,'post',return_value=self.response({})) as post:
    app.deliver_once()
    with app.db() as c:digest=c.execute('SELECT digest FROM latest').fetchone()[0]
-   info.json.return_value['sha256']=digest;app.deliver_once();self.assertEqual(post.call_count,1)
+   info.json.return_value['sha256']=digest;app.deliver_once();self.assertEqual(post.call_count,2)
+   self.assertEqual(post.call_args.kwargs['params']['title'], '1')
  def test_no_storage(self):
   app.enqueue(self.event());info=self.info();info.json.return_value['storage']=False
   with patch.object(app.requests,'get',return_value=info),patch.object(app.requests,'post') as post:

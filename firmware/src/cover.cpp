@@ -32,24 +32,16 @@ static String hashFile(const String& path) {
 }
 static String labelText() {
   String line = coverTitle;
-  if (coverYear.length()) line += String(" (") + coverYear + ")";
   if (coverEpisode.length()) line += String(" ") + coverEpisode;
   return line;
 }
 static void drawCoverLabel() {
   if (!coverTitle.length()) return;
-  static String lastLine;
-  static int offset = 0;
-  static uint32_t lastStep = 0;
   String line = labelText();
-  if (line != lastLine) { lastLine = line; offset = 0; lastStep = millis(); }
   tft.fillRect(0, 288, 170, 32, TFT_BLACK);
   tft.setTextFont(1); tft.setTextSize(1); tft.setTextColor(TFT_WHITE, TFT_BLACK);
-  if (tft.textWidth(line) <= 162) { tft.drawString(line, 4, 292); return; }
-  if (millis() - lastStep >= 220) { offset++; lastStep = millis(); }
-  String view = line.substring(offset);
+  String view = line;
   while (view.length() && tft.textWidth(view) > 162) view.remove(view.length()-1);
-  if (offset > line.length() || offset > 0 && tft.textWidth(view) < 12) offset = 0;
   tft.drawString(view, 4, 292);
 }
 static void drawCover() {
@@ -67,9 +59,10 @@ static void drawCover() {
 }
 void coverSetup() {
   pinMode(14, INPUT_PULLUP);
+  pinMode(0, INPUT_PULLUP);
   storageOK = prefs.begin("cover", false);
   coverMode = prefs.getBool("mode", false);
-  displayPage = coverMode ? 2 : 0;
+  displayPage = coverMode ? 4 : 0;
   // Never format automatically: a mount error must not erase the saved image.
   bool mounted = LittleFS.begin(false);
   // First-time initialization is an explicit five-second hold of GPIO14 at startup.
@@ -149,10 +142,17 @@ void coverLoop() {
   if(now!=stable && millis()-changed>=35) {
     stable=now;
     if(!stable) {
-      displayPage = (displayPage + 1) % 3;
-      coverMode = displayPage == 2;
+      displayPage = (displayPage + 1) % 5;
+      coverMode = displayPage == 4;
       prefs.putBool("mode", coverMode);
       if(coverMode) drawCover(); else lastRefresh=millis()-5000;
     }
+  }
+  static bool refreshRaw=true, refreshStable=true; static uint32_t refreshChanged=0;
+  bool refreshNow=digitalRead(0);
+  if(refreshNow!=refreshRaw) { refreshRaw=refreshNow; refreshChanged=millis(); }
+  if(refreshNow!=refreshStable && millis()-refreshChanged>=35) {
+    refreshStable=refreshNow;
+    if(!refreshStable && !coverMode) lastRefresh=millis()-5000;
   }
 }

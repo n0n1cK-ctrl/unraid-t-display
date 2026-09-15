@@ -4,7 +4,7 @@ ESP32/LILYGO T-Display project for Unraid server monitoring with a switchable co
 
 `service/` contains the Unraid cover service for Radarr and Sonarr. Firmware is maintained separately; this change does not flash or modify the display.
 
-`firmware/` contains the complete PlatformIO/Arduino firmware for the LilyGO T-Display-S3: the existing Unraid status screen, the persistent cover view, GPIO14 mode switching, LittleFS/NVS persistence and the display HTTP endpoints. Create a local ignored `firmware/include/secrets.h` before compiling.
+`firmware/` contains the complete PlatformIO/Arduino firmware for the LilyGO T-Display-S3: the existing Unraid status screen, the persistent cover view, five display pages and GPIO14 page switching, LittleFS/NVS persistence and the display HTTP endpoints. Create a local ignored `firmware/include/secrets.h` before compiling.
 
 ## Fotos aus dem Aufbau
 
@@ -49,3 +49,26 @@ The test suite covers event filtering, invalid IDs, authenticated HTTP webhooks,
 - The real display reports available storage and RGB565LE support.
 - The deployed container uses port `192.168.178.56:8089` and restart policy `unless-stopped`.
 - Private configuration and state backups remain under `/mnt/user/appdata/unraid-cover/` and are not committed.
+
+## Display update — September 2026
+
+The right button (GPIO14) cycles through **Unraid → Storage/RAM → GPU → Airflow → Poster**. The left button (GPIO0) redraws the current status page from the latest cached response; it does not trigger an immediate server measurement or refresh the poster. Status polling continues every five seconds.
+
+Poster titles are static, without an appended year. Long titles are clipped; season/episode metadata is displayed when supplied. Storage and RAM use matching typography and bars. The connection screen shows a white Wi-Fi icon with a red cross. Airflow uses centered labels and RPM values without icons.
+
+The `/status` response must additionally contain:
+
+```json
+{
+  "storage": {"free_bytes": 15263788695552, "total_bytes": 31717526470656},
+  "memory": {"used": 6460, "total": 31870},
+  "gpu": {"name": "Intel i915", "render": 0, "video": 0, "video_enhance": 0},
+  "fans": [{"name": "FAN 1", "rpm": 268}, {"name": "FAN 2", "rpm": 975}]
+}
+```
+
+Storage values are bytes; memory values are MiB. The current firmware divides by powers of 1024, although its labels say TB/GB (numerically TiB/GiB). Select the actual storage dataset, not the cache pool. The installation uses `/mnt/storage/Data`. Its host-side `status.sh` and API changes were applied separately on Unraid and are not included in this repository snapshot.
+
+Fan roles must be verified against the physical connectors: the two sensors both report `Array Fan`, so their order alone does not establish CPU versus case fan. GPU fallback zeros do not prove a successful measurement or the absence of transcoding.
+
+Build and upload from `firmware/` using `pio run` and `pio run -t upload --upload-port <current-port>`. Discover the current port with `pio device list`. Keep `include/secrets.h` local and ignored. The older deployment notes in `firmware/README.md` describe the initial installation, before these display updates.

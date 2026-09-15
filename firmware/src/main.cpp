@@ -22,11 +22,11 @@ uint16_t statusColor(int value, int yellowAt, int redAt) {
 void drawBar(int x, int y, int width, int height, int percent, uint16_t color) {
   percent = constrain(percent, 0, 100);
 
-  tft.drawRoundRect(x, y, width, height, 3, TFT_DARKGREY);
+  tft.fillRoundRect(x, y, width, height, 3, TFT_DARKGREY);
 
-  int fillWidth = ((width - 4) * percent) / 100;
+  int fillWidth = (width * percent) / 100;
   if (fillWidth > 0) {
-    tft.fillRoundRect(x + 2, y + 2, fillWidth, height - 4, 2, color);
+    tft.fillRoundRect(x, y, fillWidth, height, 3, color);
   }
 }
 
@@ -67,6 +67,33 @@ void drawLabelValue(const char* label, const String& value, int y, uint16_t colo
   tft.setTextColor(color, TFT_BLACK);
   int valueWidth = tft.textWidth(value);
   tft.drawString(value, 162 - valueWidth, y);
+}
+
+void drawDiskIcon(int x, int y) {
+  tft.drawRoundRect(x, y, 32, 22, 3, TFT_LIGHTGREY);
+  tft.drawFastHLine(x + 3, y + 6, 26, TFT_DARKGREY);
+  tft.fillCircle(x + 24, y + 15, 3, UNRAID_ORANGE);
+  tft.drawCircle(x + 9, y + 15, 3, TFT_LIGHTGREY);
+}
+
+void drawRamIcon(int x, int y) {
+  tft.drawRoundRect(x, y, 34, 16, 2, TFT_LIGHTGREY);
+  for (int i = 0; i < 4; i++) {
+    tft.fillRect(x + 5 + i * 6, y + 4, 4, 6, UNRAID_ORANGE);
+    tft.drawFastVLine(x + 5 + i * 6, y + 16, 4, TFT_LIGHTGREY);
+  }
+}
+
+void drawFanIcon(int x, int y) {
+  int cx = x + 14, cy = y + 14;
+  tft.drawRect(x, y, 28, 28, TFT_WHITE);
+  tft.drawLine(cx, cy, cx + 2, cy - 11, TFT_WHITE);
+  tft.drawLine(cx + 1, cy, cx + 11, cy + 5, TFT_WHITE);
+  tft.drawLine(cx - 1, cy, cx - 10, cy + 6, TFT_WHITE);
+  tft.drawLine(cx - 1, cy, cx + 4, cy - 9, TFT_WHITE);
+  tft.drawLine(cx + 1, cy + 1, cx + 9, cy + 4, TFT_WHITE);
+  tft.drawLine(cx - 1, cy + 1, cx - 8, cy + 5, TFT_WHITE);
+  tft.fillCircle(cx, cy, 3, UNRAID_ORANGE);
 }
 
 void drawDashboard(JsonDocument& doc) {
@@ -170,27 +197,95 @@ void drawStorage(JsonDocument& doc) {
   tft.fillRect(0, 0, 170, 30, UNRAID_ORANGE);
   tft.setTextFont(2); tft.setTextColor(TFT_WHITE, UNRAID_ORANGE); tft.drawString("SPEICHER", 8, 7);
   JsonObject storage = doc["storage"].as<JsonObject>();
-  long long freeBytes = storage["free"] | (doc["free_bytes"] | 0LL);
-  long long totalBytes = storage["total"] | (doc["total_bytes"] | 0LL);
+  long long freeBytes = storage["free_bytes"] | (doc["free_bytes"] | 0LL);
+  long long totalBytes = storage["total_bytes"] | (doc["total_bytes"] | 0LL);
   if (freeBytes <= 0) {
     tft.setTextFont(2); tft.setTextColor(TFT_YELLOW, TFT_BLACK); tft.drawString("Keine Daten", 8, 140); return;
   }
-  float freeGb = freeBytes / 1073741824.0f;
-  float totalGb = totalBytes > 0 ? totalBytes / 1073741824.0f : 0;
-  tft.setTextFont(2); tft.setTextColor(TFT_WHITE, TFT_BLACK); tft.drawString("FREI", 8, 58);
-  String freeText = totalGb > 0 ? String(freeGb, 1) + "/" + String(totalGb, 1) + " GB" : String(freeGb, 1) + " GB";
-  tft.drawString(freeText, 8, 92);
+  float freeTb = freeBytes / 1099511627776.0f;
+  float totalTb = totalBytes > 0 ? totalBytes / 1099511627776.0f : 0;
+  tft.setTextFont(1); tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK); tft.drawString("FREIER SPEICHER", 8, 52);
+  tft.setTextFont(4); tft.setTextColor(TFT_WHITE, TFT_BLACK);
+  tft.drawString(String(freeTb, 1) + " TB", 8, 70);
+  drawDiskIcon(128, 72);
+  tft.setTextFont(1); tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
+  if (totalTb > 0) tft.drawString(String("VON ") + String(totalTb, 1) + " TB GESAMT", 8, 112);
   if (totalBytes > 0) {
     int used = 100 - (int)((freeBytes * 100) / totalBytes);
-    drawBar(8, 132, 154, 12, used, statusColor(used, 70, 90));
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString(String(used) + "% BELEGT", 8, 136);
+    drawBar(8, 154, 154, 14, used, statusColor(used, 70, 90));
   }
-  tft.setTextFont(1); tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
-  tft.drawString("Taster: nächste Seite", 8, 292);
+  long ramUsedMb = doc["memory"]["used"] | 0LL;
+  long ramTotalMb = doc["memory"]["total"] | 0LL;
+  if (ramTotalMb > 0) {
+    int ramPercent = (int)((ramUsedMb * 100LL) / ramTotalMb);
+    tft.setTextFont(1); tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
+    tft.drawString("RAM FREI", 8, 188);
+    tft.setTextFont(4); tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    tft.drawString(String((ramTotalMb - ramUsedMb) / 1024.0f, 1) + " GB", 8, 200);
+    drawRamIcon(128, 202);
+    tft.setTextFont(1); tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
+    tft.drawString(String("VON ") + String(ramTotalMb / 1024.0f, 1) + " GB GESAMT", 8, 228);
+    drawBar(8, 244, 154, 14, ramPercent, statusColor(ramPercent, 70, 90));
+  }
+}
+
+void drawGpu(JsonDocument& doc) {
+  tft.fillScreen(TFT_BLACK);
+  tft.fillRect(0, 0, 170, 30, UNRAID_ORANGE);
+  tft.setTextFont(2); tft.setTextColor(TFT_WHITE, UNRAID_ORANGE); tft.drawString("GPU", 8, 7);
+  JsonObject gpu = doc["gpu"].as<JsonObject>();
+  const char* name = gpu["name"] | "Intel i915";
+  tft.setTextFont(1); tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK); tft.drawString(name, 8, 46);
+  const char* labels[] = {"RENDER/3D", "VIDEO", "VIDEO ENHANCE"};
+  const char* keys[] = {"render", "video", "video_enhance"};
+  for (int i = 0; i < 3; i++) {
+    int y = 82 + i * 52;
+    int value = constrain((int)(gpu[keys[i]] | 0), 0, 100);
+    tft.setTextColor(TFT_WHITE, TFT_BLACK); tft.drawString(labels[i], 8, y);
+    tft.drawString(String(value) + "%", 122, y);
+    drawBar(8, y + 18, 154, 14, value, statusColor(value, 70, 90));
+  }
+}
+
+void drawFans(JsonDocument& doc) {
+  tft.fillScreen(TFT_BLACK);
+  tft.fillRect(0, 0, 170, 30, UNRAID_ORANGE);
+  tft.setTextFont(2); tft.setTextColor(TFT_WHITE, UNRAID_ORANGE); tft.drawString("AIRFLOW", 8, 7);
+  JsonArray fans = doc["fans"].as<JsonArray>();
+  int y = 112;
+  for (JsonObject fan : fans) {
+    if (y > 260) break;
+    int rpm = fan["rpm"] | 0;
+    const char* label = fan["name"] | "LUEFTER";
+    tft.setTextFont(1); tft.setTextColor(TFT_LIGHTGREY, TFT_BLACK);
+    int labelX = (170 - tft.textWidth(label)) / 2;
+    tft.drawString(label, labelX, y);
+    tft.setTextFont(4); tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    String rpmText = String(rpm) + " RPM";
+    int rpmX = (170 - tft.textWidth(rpmText)) / 2;
+    tft.drawString(rpmText, rpmX, y + 14);
+    y += 82;
+  }
+  if (!fans.size()) { tft.setTextColor(TFT_YELLOW, TFT_BLACK); tft.drawString("Keine Daten", 8, 120); }
 }
 
 void drawMessage(const char* title, const char* detail, uint16_t color) {
   if (coverMode) return;
   tft.fillScreen(TFT_BLACK);
+
+  if (String(title) == "VERBINDUNG" || String(title) == "WLAN") {
+    tft.setTextColor(TFT_WHITE, TFT_BLACK);
+    int cx = 85, cy = 150;
+    tft.drawCircle(cx, cy + 18, 5, TFT_WHITE);
+    tft.drawArc(cx, cy + 18, 24, 18, 130, 230, TFT_WHITE, TFT_BLACK);
+    tft.drawArc(cx, cy + 18, 42, 36, 130, 230, TFT_WHITE, TFT_BLACK);
+    tft.drawArc(cx, cy + 18, 60, 54, 130, 230, TFT_WHITE, TFT_BLACK);
+    tft.drawLine(cx - 12, 224, cx + 12, 248, TFT_RED);
+    tft.drawLine(cx + 12, 224, cx - 12, 248, TFT_RED);
+    return;
+  }
 
   tft.setTextFont(2);
   tft.setTextColor(color, TFT_BLACK);
@@ -236,6 +331,8 @@ void fetchAndDraw() {
   auto result = deserializeJson(doc, payload);
   if (result) { drawMessage("JSON FEHLER", result.c_str(), TFT_RED); return; }
   if (displayPage == 1) { drawStorage(doc); return; }
+  if (displayPage == 2) { drawGpu(doc); return; }
+  if (displayPage == 3) { drawFans(doc); return; }
   drawDashboard(doc);
 }
 
