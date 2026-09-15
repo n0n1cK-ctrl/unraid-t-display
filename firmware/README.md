@@ -6,15 +6,15 @@ Firmware for the LilyGO T-Display-S3 with five views:
 - Storage and RAM
 - GPU
 - Airflow/fans
-- Poster with title and season/episode for series
+- Poster with a centered `S03E02` label for series; title for movies
 
-GPIO14 switches to the next view. GPIO0 refreshes the current view. Wi-Fi credentials and the cover key stay only in the local, ignored `include/secrets.h` file.
+GPIO14 switches to the next view. GPIO0 redraws the current status view from cached data; it does not refresh the poster. Wi-Fi credentials and the cover key stay only in the local, ignored `include/secrets.h` file.
 
 ## Cover display
 
 The service processes only successful import webhooks (`eventType=Download`) from Radarr and Sonarr. Posters are read from the local MediaCover directories, cropped to 170 × 320 pixels and sent to the display as RGB565LE. The latest state is stored persistently and delivery is retried after temporary failures.
 
-Series webhooks use `episodes[]`; the highest season/episode pair from the import is shown as `SxxExx`.
+Series webhooks use `episodes[]`; the highest season/episode pair from the import is shown centered as `S03E02`, without the series title. If episode metadata is missing, the title is shown instead.
 
 ## Compile and flash
 

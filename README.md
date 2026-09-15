@@ -54,7 +54,7 @@ The test suite covers event filtering, invalid IDs, authenticated HTTP webhooks,
 
 The right button (GPIO14) cycles through **Unraid → Storage/RAM → GPU → Airflow → Poster**. The left button (GPIO0) redraws the current status page from the latest cached response; it does not trigger an immediate server measurement or refresh the poster. Status polling continues every five seconds.
 
-Poster titles are static, without an appended year. Long titles are clipped; season/episode metadata is displayed when supplied. Storage and RAM use matching typography and bars. The connection screen shows a white Wi-Fi icon with a red cross. Airflow uses centered labels and RPM values without icons.
+Series with episode metadata show only a horizontally centered label such as `S03E02` beneath the poster. Movies, and series without episode metadata, show the title without an appended year; long titles are clipped. Storage and RAM use matching typography and bars. The connection screen shows a white Wi-Fi icon with a red cross. Airflow uses centered labels and RPM values without icons.
 
 The `/status` response must additionally contain:
 
@@ -73,9 +73,11 @@ Storage values are bytes; memory values are MiB. The current firmware divides by
 
 Fan roles must be verified against the physical connectors: the two sensors both report `Array Fan`, so their order alone does not establish CPU versus case fan. GPU fallback zeros do not prove a successful measurement or the absence of transcoding.
 
-Build and upload from `firmware/` using `pio run` and `pio run -t upload --upload-port <current-port>`. Discover the current port with `pio device list`. Keep `include/secrets.h` local and ignored. The older deployment notes in `firmware/README.md` describe the initial installation, before these display updates.
+Build and upload from `firmware/` using `pio run` and `pio run -t upload --upload-port <current-port>`. Discover the current port with `pio device list`. Keep `include/secrets.h` local and ignored. See [`firmware/README.md`](firmware/README.md) for firmware setup and controls.
 
 ## Sonarr episode metadata
 
 Import webhooks read `episodes[]` for season and episode numbers, with a fallback to the older singular `episode` object. Multi-episode imports show the highest season/episode pair in that event. Season 0 specials are supported. Updating the service applies this to subsequent imports; previously stored imports with missing episode metadata require a new import notification.
 
+
+When episode metadata is absent, the service also checks `episodeFile.relativePath` or `episodeFile.path` for a pattern such as `S03E02`. A library scan of files already in a series folder is not sufficient by itself: the cover service must receive a `Download` import webhook. The `series.id` is Sonarr's internal series ID, not the TVDB ID; it must match the local MediaCover directory.

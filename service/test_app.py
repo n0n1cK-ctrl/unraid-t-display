@@ -37,6 +37,16 @@ class Tests(unittest.TestCase):
   for value in (None,[],[None,{}, {'seasonNumber':'1','episodeNumber':2}]):
    payload['episodes']=value
    self.assertIsNone(app.parse_event('sonarr',payload)['episode'])
+ def test_sonarr_episode_path_fallback(self):
+  for field in ('relativePath', 'path'):
+   payload={'eventType':'Download','series':{'id':8},'episodeFile':{field:'/shows/Series/Series.S03E02.mkv'}}
+   event=app.parse_event('sonarr',payload)
+   self.assertEqual((event['season'],event['episode']),(3,2))
+   payload['episodes']=[{'seasonNumber':4,'episodeNumber':5}]
+   event=app.parse_event('sonarr',payload)
+   self.assertEqual((event['season'],event['episode']),(4,5))
+  payload={'eventType':'Download','series':{'id':8},'episodeFile':{'relativePath':'Series.mkv'}}
+  self.assertIsNone(app.parse_event('sonarr',payload)['episode'])
  def test_invalid_ids(self):
   for val in (None,True,-1,'1'):
    with self.assertRaises(ValueError):app.parse_event('radarr',{'eventType':'Download','movie':{'id':val}})

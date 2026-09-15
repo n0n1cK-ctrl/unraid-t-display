@@ -44,7 +44,7 @@ def parse_event(source, payload):
         episode_file = payload.get('episodeFile')
         if isinstance(episode_file, dict):
             file_path = str(episode_file.get('relativePath') or episode_file.get('path') or '')
-            match = re.search(r'[Ss](\\d{1,2})[ ._-]*[Ee](\\d{1,3})', file_path)
+            match = re.search(r'[Ss](\d{1,2})[ ._-]*[Ee](\d{1,3})', file_path)
             if match:
                 episode = {'seasonNumber': int(match.group(1)), 'episodeNumber': int(match.group(2))}
     return {'source': source, 'id': media['id'], 'title': str(media.get('title', ''))[:500],
