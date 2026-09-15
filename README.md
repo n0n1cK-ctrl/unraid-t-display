@@ -12,6 +12,16 @@ ESP32/LILYGO T-Display project for Unraid server monitoring with a switchable co
 
 [Watch the demo video](https://raw.githubusercontent.com/n0n1Ck-ctrl/unraid-t-display/main/docs/images/IMG_5090-compressed.mp4)
 
+## 🛠 Hardware
+
+This project was developed for the **LILYGO T-Display-S3**.
+
+👉 [LILYGO T-Display-S3 on Amazon](https://amzn.to/4yBHzp5)
+
+> **Affiliate Disclosure:** This link is an affiliate link.  
+> As an Amazon Associate, I earn from qualifying purchases.  
+> There is no additional cost to you.
+
 ## Radarr and Sonarr
 
 In **Settings → Connect → + → Webhook** create or keep the `LilyGO Cover` webhook:
@@ -69,13 +79,3 @@ Build and upload from `firmware/` using `pio run` and `pio run -t upload --uploa
 
 Import webhooks read `episodes[]` for season and episode numbers, with a fallback to the older singular `episode` object. Multi-episode imports show the highest season/episode pair in that event. Season 0 specials are supported. Updating the service applies this to subsequent imports; previously stored imports with missing episode metadata require a new import notification.
 
-
-## 🛠 Hardware
-
-This project was developed for the **LILYGO T-Display-S3**.
-
-👉 [LILYGO T-Display-S3 on Amazon](https://amzn.to/4yBHzp5)
-
-> **Affiliate Disclosure:** This link is an affiliate link.  
-> As an Amazon Associate, I earn from qualifying purchases.  
-> There is no additional cost to you.
