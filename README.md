@@ -69,7 +69,6 @@ Build and upload from `firmware/` using `pio run` and `pio run -t upload --uploa
 
 Import webhooks read `episodes[]` for season and episode numbers, with a fallback to the older singular `episode` object. Multi-episode imports show the highest season/episode pair in that event. Season 0 specials are supported. Updating the service applies this to subsequent imports; previously stored imports with missing episode metadata require a new import notification.
 
-## Hardware
 
 ## 🛠 Hardware
 
