@@ -25,6 +25,10 @@ pio run -t upload --upload-port <aktueller-port>
 
 Den Port mit `pio device list` ermitteln. Vor dem Kompilieren eine lokale `firmware/include/secrets.h` aus der Vorlage der eigenen Installation anlegen. Diese Datei wird nicht versioniert.
 
+## Speicherpool-Hinweis
+
+Diese Installation verwendet einen gebündelten Speicherpool ohne klassisches Unraid-Array mit Paritätslaufwerk. Die Speicheranzeige basiert deshalb auf dem tatsächlich eingebundenen Pool-Datensatz und nicht auf den üblichen Array-/Parity-Pfaden. Befehle und Mount-Pfade aus diesem Projekt sind installationsabhängig und müssen bei einem Standard-Array oder einer anderen Pool-Konfiguration angepasst und geprüft werden.
+
 ## Unraid-Dienst
 
 Der Dienst liegt unter `service/` und wird auf Unraid typischerweise nach `/mnt/user/appdata/unraid-cover/` übertragen.
