@@ -10,6 +10,8 @@ ESP32/LILYGO T-Display project for Unraid server monitoring with a switchable co
 
 ![Unraid T-Display overview](docs/images/promo-overview.png)
 
+[Demo-Video ansehen](docs/images/IMG_5090-compressed.mp4)
+
 ## Radarr and Sonarr
 
 In **Settings → Connect → + → Webhook** create or keep the `LilyGO Cover` webhook:
