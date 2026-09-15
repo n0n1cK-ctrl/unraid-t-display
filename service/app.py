@@ -1,5 +1,5 @@
 """Persistent latest-import mailbox; one worker serializes poster delivery."""
-import hashlib, hmac, io, json, logging, os, sqlite3, struct, threading, time
+import hashlib, hmac, io, json, logging, os, re, sqlite3, struct, threading, time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -39,6 +39,14 @@ def parse_event(source, payload):
     # The display accepts one episode: show the highest imported season/episode.
     episode = max(candidates, key=lambda e: (e['seasonNumber'], e['episodeNumber'])) if candidates else payload.get('episode')
     if not isinstance(episode, dict): episode = {}
+    # Manual imports may omit episodes[]; recover metadata from the imported file path.
+    if episode.get('seasonNumber') is None or episode.get('episodeNumber') is None:
+        episode_file = payload.get('episodeFile')
+        if isinstance(episode_file, dict):
+            file_path = str(episode_file.get('relativePath') or episode_file.get('path') or '')
+            match = re.search(r'[Ss](\\d{1,2})[ ._-]*[Ee](\\d{1,3})', file_path)
+            if match:
+                episode = {'seasonNumber': int(match.group(1)), 'episodeNumber': int(match.group(2))}
     return {'source': source, 'id': media['id'], 'title': str(media.get('title', ''))[:500],
             'tmdbId': media.get('tmdbId'), 'tvdbId': media.get('tvdbId'),
             'season': episode.get('seasonNumber'),
