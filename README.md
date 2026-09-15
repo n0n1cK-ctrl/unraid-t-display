@@ -16,8 +16,8 @@ ESP32/LILYGO T-Display project for Unraid server monitoring with a switchable co
 
 In **Settings → Connect → + → Webhook** create or keep the `LilyGO Cover` webhook:
 
-- Radarr: `http://192.168.178.56:8089/webhook/radarr/WEBHOOK_TOKEN` (`movie.id`)
-- Sonarr: `http://192.168.178.56:8089/webhook/sonarr/WEBHOOK_TOKEN` (`series.id`)
+- Radarr: `http://<unraid-ip>:8089/webhook/radarr/<webhook-token>` (`movie.id`)
+- Sonarr: `http://<unraid-ip>:8089/webhook/sonarr/<webhook-token>` (`series.id`)
 - Method: **POST**.
 - Enable **On Import** and **On Upgrade**; leave other events disabled.
 - Replace `WEBHOOK_TOKEN` with the existing value in the service's private `.env`.
@@ -40,14 +40,6 @@ docker compose up -d --build
 
 The test suite covers event filtering, invalid IDs, authenticated HTTP webhooks, restart persistence, poster conversion, retry behavior and the existing Radarr/Sonarr paths. Tests use temporary state and a simulated display.
 
-## Deployment verification — 14 September 2026
-
-- Sonarr notification ID 13 and Radarr ID 12: `LilyGO Cover`, imports/upgrades enabled; existing configuration preserved.
-- The service was tested locally and in an isolated container on Unraid.
-- The real display reports available storage and RGB565LE support.
-- The deployed container uses port `192.168.178.56:8089` and restart policy `unless-stopped`.
-- Private configuration and state backups remain under `/mnt/user/appdata/unraid-cover/` and are not committed.
-
 ## Display update — September 2026
 
 The right button (GPIO14) cycles through **Unraid → Storage/RAM → GPU → Airflow → Poster**. The left button (GPIO0) redraws the current status page from the latest cached response; it does not trigger an immediate server measurement or refresh the poster. Status polling continues every five seconds.
@@ -67,7 +59,7 @@ The `/status` response must additionally contain:
 
 This installation uses a pooled storage setup without a traditional Unraid parity array. Storage reporting is therefore installation-specific; for an array/parity setup, adjust and verify the dataset, mount path and query.
 
-Storage values are bytes; memory values are MiB. The current firmware divides by powers of 1024, although its labels say TB/GB (numerically TiB/GiB). Select the actual storage dataset, not the cache pool. The installation uses `/mnt/storage/Data`. Its host-side `status.sh` and API changes were applied separately on Unraid and are not included in this repository snapshot.
+Storage values are bytes; memory values are MiB. The current firmware divides by powers of 1024, although its labels say TB/GB (numerically TiB/GiB). Select the actual storage dataset, not the cache pool. The host-side status script and API are installation-specific and are not included in this repository snapshot.
 
 Fan roles must be verified against the physical connectors: the two sensors both report `Array Fan`, so their order alone does not establish CPU versus case fan. GPU fallback zeros do not prove a successful measurement or the absence of transcoding.
 
