@@ -8,7 +8,7 @@ ESP32/LILYGO T-Display project for Unraid server monitoring with a switchable co
 
 ## Promo overview
 
-![Unraid T-Display overview](docs/images/promo-overview.png)
+![Unraid T-Display overview](docs/images/promo-overview.jpg)
 
 [Demo-Video ansehen](docs/images/IMG_5090-compressed.mp4)
 
