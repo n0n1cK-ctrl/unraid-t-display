@@ -16,6 +16,27 @@ class Tests(unittest.TestCase):
  def test_only_imports(self):
   for event in ('Grab','Test','MovieAdded','Rename','Health'):self.assertIsNone(app.parse_event('radarr',{'eventType':event}))
   self.assertEqual(app.parse_event('sonarr',{'eventType':'Download','series':{'id':8}})['id'],8)
+ def test_sonarr_episode_list_delivery(self):
+  payload={'eventType':'Download','series':{'id':8,'title':'Chicago Fire'},'episodes':[{'seasonNumber':1,'episodeNumber':2}]}
+  event=app.parse_event('sonarr',payload)
+  self.assertEqual((event['season'],event['episode']),(1,2))
+  app.enqueue(event);app.initialize()
+  with patch.object(app.requests,'get',return_value=self.info()),patch.object(app,'poster',return_value=self.image()),patch.object(app.requests,'post',return_value=self.response({})) as post:
+   app.deliver_once()
+   params=post.call_args.kwargs['params']
+   self.assertEqual((params['title'],params['season'],params['episode']),('Chicago Fire',1,2))
+ def test_sonarr_multiple_and_specials(self):
+  payload={'eventType':'Download','series':{'id':8},'episodes':[{'seasonNumber':1,'episodeNumber':3},{'seasonNumber':1,'episodeNumber':2}]}
+  self.assertEqual(app.parse_event('sonarr',payload)['episode'],3)
+  payload['episodes']=[{'seasonNumber':0,'episodeNumber':1}]
+  self.assertEqual(app.parse_event('sonarr',payload)['season'],0)
+ def test_sonarr_legacy_and_missing(self):
+  payload={'eventType':'Download','series':{'id':8},'episode':{'seasonNumber':2,'episodeNumber':4}}
+  self.assertEqual(app.parse_event('sonarr',payload)['episode'],4)
+  payload.pop('episode')
+  for value in (None,[],[None,{}, {'seasonNumber':'1','episodeNumber':2}]):
+   payload['episodes']=value
+   self.assertIsNone(app.parse_event('sonarr',payload)['episode'])
  def test_invalid_ids(self):
   for val in (None,True,-1,'1'):
    with self.assertRaises(ValueError):app.parse_event('radarr',{'eventType':'Download','movie':{'id':val}})

@@ -31,10 +31,18 @@ def parse_event(source, payload):
     media = payload.get(key)
     if not isinstance(media, dict) or type(media.get('id')) is not int or media['id'] <= 0:
         raise ValueError('Import needs a positive media ID')
+    episodes = payload.get('episodes')
+    candidates = episodes if isinstance(episodes, list) else []
+    candidates = [e for e in candidates if isinstance(e, dict)
+                  and type(e.get('seasonNumber')) is int and e['seasonNumber'] >= 0
+                  and type(e.get('episodeNumber')) is int and e['episodeNumber'] >= 0]
+    # The display accepts one episode: show the highest imported season/episode.
+    episode = max(candidates, key=lambda e: (e['seasonNumber'], e['episodeNumber'])) if candidates else payload.get('episode')
+    if not isinstance(episode, dict): episode = {}
     return {'source': source, 'id': media['id'], 'title': str(media.get('title', ''))[:500],
             'tmdbId': media.get('tmdbId'), 'tvdbId': media.get('tvdbId'),
-            'season': (payload.get('episode') or {}).get('seasonNumber'),
-            'episode': (payload.get('episode') or {}).get('episodeNumber'),
+            'season': episode.get('seasonNumber'),
+            'episode': episode.get('episodeNumber'),
             'year': media.get('year') or str(media.get('releaseDate') or media.get('premiereDate') or '')[:4]}
 
 def enqueue(event):
