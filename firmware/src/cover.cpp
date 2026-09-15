@@ -31,18 +31,20 @@ static String hashFile(const String& path) {
   return String(hex);
 }
 static String labelText() {
-  String line = coverTitle;
-  if (coverEpisode.length()) line += String(" ") + coverEpisode;
-  return line;
+  // Series already identify themselves through the poster; use the limited
+  // label space for season/episode. Movies keep their title.
+  if (coverEpisode.length()) return coverEpisode;
+  return coverTitle;
 }
 static void drawCoverLabel() {
-  if (!coverTitle.length()) return;
+  if (!coverTitle.length() && !coverEpisode.length()) return;
   String line = labelText();
   tft.fillRect(0, 288, 170, 32, TFT_BLACK);
   tft.setTextFont(1); tft.setTextSize(1); tft.setTextColor(TFT_WHITE, TFT_BLACK);
   String view = line;
   while (view.length() && tft.textWidth(view) > 162) view.remove(view.length()-1);
-  tft.drawString(view, 4, 292);
+  const int labelX = coverEpisode.length() ? (170 - tft.textWidth(view)) / 2 : 4;
+  tft.drawString(view, labelX, 292);
 }
 static void drawCover() {
   tft.fillScreen(TFT_BLACK);
@@ -119,7 +121,7 @@ void coverSetup() {
       coverTitle=server.arg("title");
       coverYear=server.arg("year");
       String season=server.arg("season"), episode=server.arg("episode");
-      coverEpisode = (season.length() && episode.length()) ? String("S") + (season.toInt()<10?"0":"") + season + " E" + (episode.toInt()<10?"0":"") + episode : "";
+      coverEpisode = (season.length() && episode.length()) ? String("S") + (season.toInt()<10?"0":"") + season + "E" + (episode.toInt()<10?"0":"") + episode : "";
       prefs.putString("title",coverTitle); prefs.putString("year",coverYear); prefs.putString("episode",coverEpisode);
       uploadOK=true;
       prefs.putString("slot",slot); prefs.putString("hash",wantedHash);
