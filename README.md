@@ -10,7 +10,7 @@ ESP32/LILYGO T-Display project for Unraid server monitoring with a switchable co
 
 ![Unraid T-Display overview](docs/images/promo-overview.jpg)
 
-[Demo-Video ansehen](https://raw.githubusercontent.com/n0n1Ck-ctrl/unraid-t-display/main/docs/images/IMG_5090-compressed.mp4)
+[Watch the demo video](https://raw.githubusercontent.com/n0n1Ck-ctrl/unraid-t-display/main/docs/images/IMG_5090-compressed.mp4)
 
 ## Radarr and Sonarr
 
@@ -65,7 +65,7 @@ The `/status` response must additionally contain:
 }
 ```
 
-Diese Installation verwendet einen gebündelten Speicherpool ohne klassisches Unraid-Array mit Paritätslaufwerk. Die Speicherberechnung ist deshalb installationsabhängig; bei einem Array-/Parity-Setup müssen Datensatz, Mount-Pfad und Abfrage angepasst werden.
+This installation uses a pooled storage setup without a traditional Unraid parity array. Storage reporting is therefore installation-specific; for an array/parity setup, adjust and verify the dataset, mount path and query.
 
 Storage values are bytes; memory values are MiB. The current firmware divides by powers of 1024, although its labels say TB/GB (numerically TiB/GiB). Select the actual storage dataset, not the cache pool. The installation uses `/mnt/storage/Data`. Its host-side `status.sh` and API changes were applied separately on Unraid and are not included in this repository snapshot.
 
