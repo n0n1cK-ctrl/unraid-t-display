@@ -43,7 +43,7 @@ static void drawCoverLabel() {
   tft.setTextFont(1); tft.setTextSize(1); tft.setTextColor(TFT_WHITE, TFT_BLACK);
   String view = line;
   while (view.length() && tft.textWidth(view) > 162) view.remove(view.length()-1);
-  const int labelX = coverEpisode.length() ? (170 - tft.textWidth(view)) / 2 : 4;
+  const int labelX = (170 - tft.textWidth(view)) / 2;
   tft.drawString(view, labelX, 292);
 }
 static void drawCover() {
